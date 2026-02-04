@@ -5,10 +5,14 @@ app:
 
 database:
   host: "localhost"
-  port: 5432
-  user: "root"
-  password: ""
-  name: "war_ticker_development"
+  port: 3306
+  username: "root"
+  password: "root"
+  name: "war_ticket_dev"
+  charset: "utf8mb4"
+  parseTime: true
+  loc: "Local"
+
 
 redis:
   host: "localhost"

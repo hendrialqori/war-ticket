@@ -1,35 +1,40 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	"github.com/hendrialqori/war-ticket/backend/internal/config"
-	"github.com/hendrialqori/war-ticket/backend/internal/exception"
 	"github.com/hendrialqori/war-ticket/backend/internal/middleware"
+	"github.com/hendrialqori/war-ticket/backend/internal/model"
 )
 
 func main() {
+	// load initialy config
 	config.LoadConfig()
-	appConfig := config.GetAppConfig()
 
+	// app config
+	appConfig := config.GetAppConfig()
+	// database config
+	dbConfig := config.GetDatabaseConfig()
+	// make connectin to mysql
+	db := config.NewMysqlConnection(dbConfig)
+	// make auto migration
+	model.AutoMigrationModels(db)
+
+	// instace fiber app
 	app := fiber.New(fiber.Config{
 		AppName:      appConfig.Name,
 		ErrorHandler: middleware.NewErrorMiddleware(),
 	})
 
+	// write debug at terminal
+	app.Use(logger.New())
+	// recover so that the server doesn't not die if panic
 	app.Use(recover.New())
-
-	app.Get("/error", func(c *fiber.Ctx) error {
-		return exception.ErrDataNotFound
-	})
-
-	stringify, _ := json.Marshal(appConfig)
-	fmt.Println(fmt.Sprintln(string(stringify)))
 
 	log.Fatal(app.Listen(":" + appConfig.Port))
 }
