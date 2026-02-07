@@ -1,12 +1,29 @@
 package exception
 
-import "github.com/gofiber/fiber/v2"
+type AppError struct {
+	Success bool   `json:"success"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Err     any    `json:"errors,omitempty"`
+}
 
-var (
-	// error user domain
-	ErrUserUnauthorized = fiber.NewError(fiber.StatusUnauthorized, "Unauthorized")
-	//error
-	ErrDataAlreadyExists   = fiber.NewError(fiber.StatusBadRequest, "Data already exists")
-	ErrDataNotFound        = fiber.NewError(fiber.StatusNotFound, "Data not found")
-	ErrInternalServerError = fiber.NewError(fiber.StatusInternalServerError, "Internal server error")
-)
+func (e *AppError) Error() string {
+	return e.Message
+}
+
+func New(code int, message string) *AppError {
+	return &AppError{
+		Success: false,
+		Code:    code,
+		Message: message,
+	}
+}
+
+func NewWithError(code int, message string, err any) *AppError {
+	return &AppError{
+		Success: false,
+		Code:    code,
+		Message: message,
+		Err:     err,
+	}
+}
