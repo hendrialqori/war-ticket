@@ -11,6 +11,9 @@ type DatabaseConfig struct {
 	Charset   string
 	ParseTime bool
 	Loc       string
+	Idle      int
+	Max       int
+	Lifetime  int
 }
 
 func GetDatabaseConfig() *DatabaseConfig {
@@ -23,5 +26,8 @@ func GetDatabaseConfig() *DatabaseConfig {
 		Charset:   viper.GetString("database.charset"),
 		ParseTime: viper.GetBool("database.parseTime"),
 		Loc:       viper.GetString("database.loc"),
+		Idle:      viper.GetInt("database.idle"),
+		Max:       viper.GetInt("database.max"),
+		Lifetime:  viper.GetInt("database.lifetime"),
 	}
 }
