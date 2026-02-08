@@ -15,11 +15,21 @@ type UserUsecase interface {
 	Login(ctx context.Context, in dto.LoginRequest) (string, error)
 	Register(ctx context.Context, in dto.RegisterRequest) error
 	SetActive(ctx context.Context, in dto.SetActiveRequest) error
+	GetProfile(ctx context.Context, id string) (*entity.User, error)
 }
 
 type userUsecaseImpl struct {
 	userRepository repository.UserRepository
 	config         *config.AppConfig
+}
+
+// GetProfile implements [UserUsecase].
+func (u *userUsecaseImpl) GetProfile(ctx context.Context, id string) (*entity.User, error) {
+	user, err := u.userRepository.FindById(ctx, id)
+	if err != nil {
+		return nil, exception.New(400, err.Error())
+	}
+	return user, nil
 }
 
 func (u *userUsecaseImpl) SetActive(ctx context.Context, in dto.SetActiveRequest) error {
@@ -66,13 +76,13 @@ func (u *userUsecaseImpl) Login(ctx context.Context, in dto.LoginRequest) (strin
 		return "", exception.New(400, "Wrong password")
 	}
 	// generate jwt token
-	secretKey := []byte(u.config.Secret)
-	jwtToken, err := util.CreateToken(secretKey, user)
+	jwtToken := util.NewJwtToken(u.config.Secret)
+	token, err := jwtToken.Create(user)
 	if err != nil {
 		return "", exception.New(400, err.Error())
 	}
 
-	return jwtToken, nil
+	return token, nil
 }
 
 func (u *userUsecaseImpl) Register(ctx context.Context, in dto.RegisterRequest) error {

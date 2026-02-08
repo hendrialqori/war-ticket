@@ -4,6 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/hendrialqori/war-ticket/backend/internal/dto"
+	"github.com/hendrialqori/war-ticket/backend/internal/dto/mapper"
 	"github.com/hendrialqori/war-ticket/backend/internal/exception"
 	"github.com/hendrialqori/war-ticket/backend/internal/usecase"
 	"github.com/hendrialqori/war-ticket/backend/internal/util"
@@ -13,11 +14,28 @@ type UserHandler interface {
 	Register(c *fiber.Ctx) error
 	Login(c *fiber.Ctx) error
 	SetActive(c *fiber.Ctx) error
+	GetProfile(c *fiber.Ctx) error
 }
 
 type userHandlerImpl struct {
 	userUsecase usecase.UserUsecase
 	validate    *validator.Validate
+}
+
+// GetProfile implements [UserHandler].
+func (u *userHandlerImpl) GetProfile(c *fiber.Ctx) error {
+	ctx := c.Context()
+
+	credential := util.GetCredential(c)
+
+	result, err := u.userUsecase.GetProfile(ctx, credential.ID)
+	if err != nil {
+		return err
+	}
+
+	user := mapper.ToUserDTO(result)
+
+	return util.MapToResponse(c, 200, user, "Success retrieve credential")
 }
 
 // Active implements [UserHandler].
@@ -62,7 +80,7 @@ func (u *userHandlerImpl) Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	return util.MapToResponse(c, fiber.StatusCreated, nil, "User registered")
+	return util.MapToResponse(c, 201, nil, "User registered")
 }
 
 func (u *userHandlerImpl) Login(c *fiber.Ctx) error {
@@ -84,7 +102,7 @@ func (u *userHandlerImpl) Login(c *fiber.Ctx) error {
 		return err
 	}
 
-	return util.MapToResponse(c, fiber.StatusOK, jwtToken, "You're logged in")
+	return util.MapToResponse(c, 201, jwtToken, "You're logged in")
 }
 
 func NewUserHandler(userUsecase usecase.UserUsecase, validate *validator.Validate) UserHandler {

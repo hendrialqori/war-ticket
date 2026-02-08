@@ -8,34 +8,63 @@ import (
 	"github.com/hendrialqori/war-ticket/backend/internal/entity"
 )
 
-func CreateToken(secretKey []byte, user *entity.User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":       user.ID,
-		"username": user.Username,
-		"email":    user.Email,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	result, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return result, nil
+type UserClaims struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	jwt.RegisteredClaims
 }
 
-func VerififyToken(secretKey []byte, tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (any, error) {
-		return secretKey, nil
+type JwtToken interface {
+	Create(user *entity.User) (string, error)
+	Verify(token string) (*UserClaims, error)
+}
+
+type JwtTokenImpl struct {
+	SecretKey []byte
+}
+
+// Create implements [JwtToken].
+func (j *JwtTokenImpl) Create(user *entity.User) (string, error) {
+
+	claims := UserClaims{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	return token.SignedString(j.SecretKey)
+}
+
+func (j *JwtTokenImpl) Verify(token string) (*UserClaims, error) {
+	claims := &UserClaims{}
+
+	parseToken, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (any, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method")
+		}
+		return j.SecretKey, nil
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if !token.Valid {
-		return fmt.Errorf("Invalid token")
+	if !parseToken.Valid {
+		return nil, jwt.ErrTokenInvalidClaims
 	}
 
-	return nil
+	return claims, nil
+}
+
+func NewJwtToken(secretKey string) JwtToken {
+	return &JwtTokenImpl{
+		SecretKey: []byte(secretKey),
+	}
 }
