@@ -9,6 +9,8 @@ type User struct {
 	HashPassword string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+
+	Activation *UserActivation
 }
 
 type UserActivation struct {

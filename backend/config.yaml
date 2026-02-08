@@ -1,5 +1,5 @@
 app:
-  name: "War Ticker"
+  name: "War Ticket"
   port: 8000
   env: "development"
   secret: "lorem_ipsum_dolor_si_amet_2077"

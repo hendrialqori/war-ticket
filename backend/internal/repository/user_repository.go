@@ -5,11 +5,13 @@ import (
 	"errors"
 
 	"github.com/hendrialqori/war-ticket/backend/internal/entity"
+	"github.com/hendrialqori/war-ticket/backend/internal/entity/mapper"
 	"github.com/hendrialqori/war-ticket/backend/internal/model"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
+	FindById(ctx context.Context, id string) (*entity.User, error)
 	Create(ctx context.Context, user entity.User) error
 	FindByUsernameOrEmail(ctx context.Context, value string) (*entity.User, error)
 	IsActive(ctx context.Context, email string) (bool, error)
@@ -18,6 +20,15 @@ type UserRepository interface {
 
 type userRepositoryImpl struct {
 	DB *gorm.DB
+}
+
+// FindById implements [UserRepository].
+func (u *userRepositoryImpl) FindById(ctx context.Context, id string) (*entity.User, error) {
+	var user model.UserModel
+
+	err := u.DB.WithContext(ctx).Preload("Activation").Where("id = ?", id).First(&user).Error
+
+	return mapper.ToUserEntity(&user), err
 }
 
 func (u *userRepositoryImpl) SetActive(ctx context.Context, user entity.UserActivation) error {

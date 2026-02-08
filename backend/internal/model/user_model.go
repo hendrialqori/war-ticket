@@ -9,6 +9,8 @@ type UserModel struct {
 	HashPassword string    `gorm:"column:hash_password;type:varchar(255)"`
 	CreatedAt    time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime"`
+
+	Activation *UserActivationModel `gorm:"foreignKey:UserID"`
 }
 
 func (UserModel) TableName() string {

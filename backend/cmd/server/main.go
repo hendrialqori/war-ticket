@@ -37,6 +37,8 @@ func main() {
 		ErrorHandler: middleware.NewErrorMiddleware(),
 	})
 
+	jwtMiddleware := middleware.NewTokenMiddleware(appConfig)
+
 	// write debug at terminal
 	app.Use(logger.New())
 	// recover so that the server doesn't not die if panic
@@ -48,7 +50,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userUsecase, validate)
 
 	// setup router
-	route.SetupUserRoute(app, userHandler)
+	route.SetupUserRoute(app, userHandler, jwtMiddleware)
 
 	log.Fatal(app.Listen(":" + appConfig.Port))
 }
