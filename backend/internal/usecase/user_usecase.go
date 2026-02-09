@@ -23,7 +23,6 @@ type userUsecaseImpl struct {
 	config         *config.AppConfig
 }
 
-// GetProfile implements [UserUsecase].
 func (u *userUsecaseImpl) GetProfile(ctx context.Context, id string) (*entity.User, error) {
 	user, err := u.userRepository.FindById(ctx, id)
 	if err != nil {

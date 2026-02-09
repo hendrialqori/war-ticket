@@ -41,6 +41,7 @@ func NewTokenMiddleware(config *config.AppConfig) fiber.Handler {
 			ID:       claims.ID,
 			Email:    claims.Email,
 			Username: claims.Username,
+			Role:     claims.Role,
 		}
 		c.Locals("credential", user)
 

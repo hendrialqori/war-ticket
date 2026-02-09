@@ -12,10 +12,11 @@ func ToUserEntity(m *model.UserModel) *entity.User {
 	}
 
 	var act *entity.UserActivation
+
+	// null check refers to scanning property on repository
 	if m.Activation != nil {
 		act = &entity.UserActivation{
 			ID:        m.Activation.ID,
-			UserID:    m.Activation.UserID,
 			Email:     m.Activation.Email,
 			IsActive:  m.Activation.IsActive,
 			CreatedAt: m.Activation.CreatedAt,
@@ -27,6 +28,7 @@ func ToUserEntity(m *model.UserModel) *entity.User {
 		ID:           m.ID,
 		Email:        m.Email,
 		Username:     m.Username,
+		Role:         m.Role,
 		HashPassword: m.HashPassword,
 		CreatedAt:    m.CreatedAt,
 		UpdatedAt:    m.UpdatedAt,

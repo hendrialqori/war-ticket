@@ -12,6 +12,7 @@ type UserClaims struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -31,6 +32,7 @@ func (j *JwtTokenImpl) Create(user *entity.User) (string, error) {
 		ID:       user.ID,
 		Username: user.Username,
 		Email:    user.Email,
+		Role:     user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
