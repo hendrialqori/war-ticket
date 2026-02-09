@@ -11,7 +11,7 @@ type UserActivationModel struct {
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`
 
-	User *UserModel `gorm:"foreignKey:UserID;references:ID"`
+	User *UserModel
 }
 
 func (UserActivationModel) TableName() string {

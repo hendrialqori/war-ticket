@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/hendrialqori/war-ticket/backend/internal/constant"
 	"github.com/hendrialqori/war-ticket/backend/internal/entity"
 	"github.com/hendrialqori/war-ticket/backend/internal/entity/mapper"
 	"github.com/hendrialqori/war-ticket/backend/internal/model"
@@ -26,7 +27,9 @@ type userRepositoryImpl struct {
 func (u *userRepositoryImpl) FindById(ctx context.Context, id string) (*entity.User, error) {
 	var user model.UserModel
 
-	err := u.DB.WithContext(ctx).Preload("Activation").Where("id = ?", id).First(&user).Error
+	err := u.DB.WithContext(ctx).
+		Preload("Activation").
+		Where("id = ?", id).First(&user).Error
 
 	return mapper.ToUserEntity(&user), err
 }
@@ -70,14 +73,14 @@ func (u *userRepositoryImpl) FindByUsernameOrEmail(ctx context.Context, value st
 		return nil, err
 	}
 
-	result := entity.User{
+	result := &entity.User{
 		ID:           user.ID,
 		Username:     user.Username,
 		Email:        user.Email,
 		HashPassword: user.HashPassword,
 	}
 
-	return &result, nil
+	return result, nil
 }
 
 // create new user
@@ -87,6 +90,7 @@ func (u *userRepositoryImpl) Create(ctx context.Context, user entity.User) error
 		Email:        user.Email,
 		Username:     user.Username,
 		HashPassword: user.HashPassword,
+		Role:         constant.RoleMember, // default member
 	}
 
 	result := gorm.WithResult()

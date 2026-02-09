@@ -7,6 +7,7 @@ type User struct {
 	Email        string
 	Username     string
 	HashPassword string
+	Role         string // __super_admin or __member
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 
